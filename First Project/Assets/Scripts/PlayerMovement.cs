@@ -20,11 +20,12 @@ public class PlayerMovement : MonoBehaviour
     private BoxCollider2D _boxCollider;
     private const float DEFAULT_PRECISION = 0.0001f;
     private const float DEFAULT_WALLJUMP_COOLDOWN = 0.02f;
+    private const int DEFAULT_WALLJUMP_POWER = 3;
     private const float DEFAULT_GRAVITY = 2.5f;
     private float _wallJumpCoolDown;
 
     private bool IsJumping => Input.GetKey(KeyCode.Space) && IsGrounded();
-    private bool IsWallJumping => IsOnWall() && !IsGrounded();
+    private bool IsWallJumping => Input.GetKey(KeyCode.Space) && IsOnWall() && !IsGrounded();
     private bool IsMovingLeft => _horizontalInput < -DEFAULT_PRECISION; //minimal valid variation to flip to left side
     private bool IsMovingRight => _horizontalInput > DEFAULT_PRECISION; //minimal valid variation to flip to right side
     private bool IsWalking => _horizontalInput != 0;
@@ -47,39 +48,73 @@ public class PlayerMovement : MonoBehaviour
         _horizontalInput = GetHorizontalMovementOffset();
 
         AnimateMovement();
-        Move();
 
         FlipMovementDirection();
 
-        AnimateJump();
+        if (_wallJumpCoolDown > DEFAULT_WALLJUMP_COOLDOWN)
+        {
+            Move();
 
-        if (_wallJumpCoolDown < DEFAULT_WALLJUMP_COOLDOWN)
-            Jump();
+            if (IsOnWall())
+            {
+                _body.gravityScale = 0;
+                _body.velocity = Vector2.zero;
+            }
+            else
+                _body.gravityScale = DEFAULT_GRAVITY;
+
+            if (IsWallJumping)
+                DoWallJump();
+
+            if (IsJumping)
+                DoNormalJump();
+
+            AnimateJump();
+        }
         else
             _wallJumpCoolDown += Time.deltaTime;
+
+        transform.rotation = Quaternion.identity;
     }
 
     private void FlipMovementDirection() => transform.localScale = GetHorizontalMovementDirection();
 
     /// <summary>
-    /// Changes de player gravity scale and velocity
+    /// Performs a wall jump to the opossite direction of the wall or/and upwards
     /// </summary>
-    private void Jump()
+    private void DoWallJump()
     {
-        if (IsWallJumping)
+        if (_horizontalInput == 0)
         {
-            _body.gravityScale = 0;
-            _wallJumpCoolDown = 0;
-            _body.velocity = new
+            _body.velocity = new Vector2(
+                -Mathf.Sign(transform.localScale.x) * (3 * DEFAULT_WALLJUMP_POWER),
+                0
+            );
+
+            transform.localScale = new Vector3(
+                -Mathf.Sign(transform.localScale.x),
+                transform.localScale.y,
+                transform.localScale.z
+            );
         }
         else
-            _body.gravityScale = DEFAULT_GRAVITY;
-
-        if (IsJumping)
         {
-            _body.velocity = new Vector2(_body.velocity.x, _speed);
-            _animator.SetTrigger("jump");
+            _body.velocity = new Vector2(
+                -Mathf.Sign(transform.localScale.x) * DEFAULT_WALLJUMP_POWER,
+                2 * DEFAULT_WALLJUMP_POWER
+            );
         }
+
+        _wallJumpCoolDown = 0;
+    }
+
+    /// <summary>
+    /// Performs a normal jump both while moving or while idle
+    /// </summary>
+    private void DoNormalJump()
+    {
+        _body.velocity = new Vector2(_body.velocity.x, _jumpPower);
+        _animator.SetTrigger("jump");
     }
 
     private void AnimateMovement() => _animator.SetBool("walking", IsWalking);
@@ -123,6 +158,8 @@ public class PlayerMovement : MonoBehaviour
 
         return raycastHit.collider != null;
     }
+
+    public bool CanAttack() => _horizontalInput == 0 && IsGrounded() && !IsOnWall();
 
     private Vector3 GetHorizontalMovementDirection()
     {

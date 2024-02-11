@@ -374,6 +374,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 3956414622440870605, guid: 3c35d2d20b68c8b45a8818d43fa25720, type: 3}
+      propertyPath: _jumpPower
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3956414622440870605, guid: 3c35d2d20b68c8b45a8818d43fa25720, type: 3}
       propertyPath: _wallLayer.m_Bits
       value: 64
       objectReference: {fileID: 0}
