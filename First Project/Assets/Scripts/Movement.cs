@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
     private const float DEFAULT_WALLJUMP_COOLDOWN = 0.02f;
     private const int DEFAULT_WALLJUMP_POWER = 3;
     private const float DEFAULT_GRAVITY = 2.5f;
-    private float _wallJumpCoolDown;
+    private float _wallJumpCooldown;
 
     private bool IsJumping => Input.GetKey(KeyCode.Space) && IsGrounded();
     private bool IsWallJumping => Input.GetKey(KeyCode.Space) && IsOnWall() && !IsGrounded();
@@ -51,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
 
         FlipMovementDirection();
 
-        if (_wallJumpCoolDown > DEFAULT_WALLJUMP_COOLDOWN)
+        if (_wallJumpCooldown > DEFAULT_WALLJUMP_COOLDOWN)
         {
             Move();
 
@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
             AnimateJump();
         }
         else
-            _wallJumpCoolDown += Time.deltaTime;
+            _wallJumpCooldown += Time.deltaTime;
 
         transform.rotation = Quaternion.identity;
     }
@@ -105,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
             );
         }
 
-        _wallJumpCoolDown = 0;
+        _wallJumpCooldown = 0;
     }
 
     /// <summary>
