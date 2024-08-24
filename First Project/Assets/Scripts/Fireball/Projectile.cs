@@ -66,7 +66,8 @@ public class Projectile : MonoBehaviour
 
         _lifeTime = 0;
         _hit = false;
-        _boxCollider.enabled = true;
+        if (_boxCollider != null)
+            _boxCollider.enabled = true;
         _direction = direction;
         float localScaleX = transform.localScale.x;
 
